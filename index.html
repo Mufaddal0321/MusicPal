@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MusicPal 🎶</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom right, #6a0dad, #b266ff);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      padding-top: 50px;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+    .chat-box {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+    }
+    input {
+      padding: 12px;
+      width: 80%;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 12px 20px;
+      background: #ff66cc;
+      border: none;
+      border-radius: 10px;
+      font-weight: bold;
+      color: white;
+      cursor: pointer;
+    }
+    .response {
+      margin-top: 20px;
+    }
+    iframe {
+      margin-top: 20px;
+      width: 100%;
+      height: 300px;
+      border: none;
+      border-radius: 15px;
+    }
+    .heart-bg {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: -1;
+    }
+    .heart {
+      position: absolute;
+      color: #ffccff;
+      font-size: 20px;
+      animation: float 8s linear infinite;
+    }
+    @keyframes float {
+      0% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+      }
+      50% {
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(-10vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="heart-bg" id="heartContainer"></div>
+
+  <h1>🎶 MusicPal</h1>
+  <div class="chat-box">
+    <p>Ask me to play any song 💬</p>
+    <input type="text" id="songInput" placeholder="e.g., Kesariya, Tum Hi Ho">
+    <br />
+    <button onclick="searchSong()">Play</button>
+    <div class="response" id="response"></div>
+    <div id="player"></div>
+  </div>
+
+  <script>
+    const API_KEY = "AIzaSyA4bN7y9Kvt-HQF5mif-KNHKr838Uru3_8";
+
+    function searchSong() {
+      const query = document.getElementById("songInput").value;
+      const responseBox = document.getElementById("response");
+      const playerBox = document.getElementById("player");
+
+      if (!query) {
+        responseBox.innerHTML = "<p>Please enter a song name 💬</p>";
+        return;
+      }
+
+      responseBox.innerHTML = "Searching for \"" + query + "\"...";
+      playerBox.innerHTML = "";
+
+      fetch(
+        `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&q=${encodeURIComponent(
+          query
+        )}&key=${API_KEY}&maxResults=1`
+      )
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.items && data.items.length > 0) {
+            const videoId = data.items[0].id.videoId;
+            const title = data.items[0].snippet.title;
+
+            responseBox.innerHTML = `🎵 Found: <strong>${title}</strong>`;
+            playerBox.innerHTML = `<iframe src="https://www.youtube.com/embed/${videoId}?autoplay=1" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+          } else {
+            responseBox.innerHTML = "Sorry, I couldn't find that song 😢";
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          responseBox.innerHTML = "Something went wrong. Try again later.";
+        });
+    }
+
+    // heart animation
+    const heartContainer = document.getElementById("heartContainer");
+    setInterval(() => {
+      const heart = document.createElement("div");
+      heart.className = "heart";
+      heart.innerHTML = "💜";
+      heart.style.left = Math.random() * 100 + "vw";
+      heart.style.animationDuration = 5 + Math.random() * 5 + "s";
+      heartContainer.appendChild(heart);
+      setTimeout(() => heart.remove(), 10000);
+    }, 400);
+  </script>
+</body>
+</html>
